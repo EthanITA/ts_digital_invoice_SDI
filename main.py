@@ -6,6 +6,7 @@ from typing import Iterable
 from rich import print
 
 import credentials
+from log import logging
 from ts_api import TSDigital
 
 
@@ -38,9 +39,9 @@ class Invoice:
     def get_invoices_path(path: str):
         def is_year(year):
             try:
-                if datetime.strptime(year, "%Y") != datetime.today().year:
-                    return False
-                return True
+                if datetime.strptime(year, "%Y").year == datetime.today().year:
+                    return True
+                return False
             except ValueError:
                 return False
 
@@ -65,7 +66,7 @@ class Invoice:
         the function gets basenames
         :return:
         """
-        return map(lambda path: path[1], self.invoices_path)
+        return list(map(lambda path: path[1], self.invoices_path))
 
     def to_full_path(self, name: str) -> str:
         for dirpath, filename in self.invoices_path:
@@ -105,6 +106,8 @@ sent_invoices = Invoice(sent_invoices_path)
 ito_invoices = Invoice(to_send_invoices_path)
 
 to_send_invoices = get_to_send_invoices()
+logging.info(sent_invoices.basenames)
+logging.info(ito_invoices.basenames)
 if len(to_send_invoices) > 0:
     print("Fatture Inviate:")
     send_invoices(to_send_invoices)
