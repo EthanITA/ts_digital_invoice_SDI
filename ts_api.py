@@ -159,8 +159,7 @@ class TSDigital:
         response = requests.post('https://ts-console-api.agyo.io/invoices', headers=headers, data=data)
 
         if response.status_code == 201:
-            logging.info(
-                f"{base_info['senderName']} ===[{base_info['invoiceNumber']}][{base_info['date']}]===> {base_info['recipientName']}")
+            logging.info(json.dumps(base_info, indent=4, sort_keys=True))
             return base_info
         else:
             logging.error(f"Status code={response.status_code}\tmsg={response.text}")

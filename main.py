@@ -68,49 +68,59 @@ class Invoice:
         """
         return list(map(lambda path: path[1], self.invoices_path))
 
+    def basename(self, path: str) -> str:
+        return os.path.basename(path)
+
     def to_full_path(self, name: str) -> str:
         for dirpath, filename in self.invoices_path:
             if filename == name:
                 return os.path.join(dirpath, filename)
 
 
-def get_to_send_invoices() -> list:
+def get_unsent_invoices() -> list:
     """
-    the function retrieves unsent invoices
+    the function retrieves sorted unsent invoices
     :return:
     """
-    unsent_invoices = set(ito_invoices.basenames)
-    ssent_invoices = set(sent_invoices.basenames)
-    return [ito_invoices.to_full_path(filename) for filename in unsent_invoices.difference(ssent_invoices)]
+    import json
+
+    i_invoices = set(ito_invoices.basenames)
+    s_invoices = set(sent_invoices.basenames)
+    unsent_invoices = sorted(i_invoices.difference(s_invoices))
+    logging.info(f"unsent={json.dumps(unsent_invoices, indent=4, sort_keys=True)}")
+    return [ito_invoices.to_full_path(filename) for filename in unsent_invoices]
 
 
 def send_invoices(path):
     ts = TSDigital(credentials.email, credentials.password, credentials.VAT_number)
+    sent = 0
     for invoice_path in path:
         base_info = ts.invoices(invoice_path)
         if base_info is not None:
+            sent += 1
             destination_path = invoice_path.replace(to_send_invoices_path, sent_invoices_path)
 
             os.makedirs(os.path.dirname(destination_path), exist_ok=True)
             shutil.copyfile(invoice_path, destination_path)
 
-            print(f"\t[i]{invoice_path} ==> {destination_path}[/i]")
+            print()
+            print(f"[bold green][i]{os.path.basename(destination_path)}[/i][/bold green]")
             print(
-                f"\t{base_info['senderName']} ===[bold cyan][{base_info['invoiceNumber']}][{base_info['date']}][/bold cyan]===> [u]{base_info['recipientName']}[/u]")
+                f"\t{base_info['senderName']} ==[bold cyan][{base_info['invoiceNumber']}][{base_info['date']}][/bold cyan]==> [u]"
+                f"{base_info['recipientName']} ({base_info['recipientId']})[/u]")
+    return sent
 
 
-sent_invoices_path = "c:\\Users\\SER\\Desktop\\FATTURA PER CLIENTE"
-to_send_invoices_path = "d:\\ItoTech\\Documento\\Fattura_Xml"
+sent_invoices_path = "c:\\Users\\SER\\Desktop\\MARCO\\FATTURA PER CLIENTE"
+to_send_invoices_path = "c:\\Users\\SER\\Desktop\\MARCO\\Fattura_Xml"
 
 sent_invoices = Invoice(sent_invoices_path)
 ito_invoices = Invoice(to_send_invoices_path)
 
-to_send_invoices = get_to_send_invoices()
-logging.info(sent_invoices.basenames)
-logging.info(ito_invoices.basenames)
+to_send_invoices = get_unsent_invoices()
 if len(to_send_invoices) > 0:
-    print("Fatture Inviate:")
-    send_invoices(to_send_invoices)
+
+    print(f"\n  Fatture Inviate: {send_invoices(to_send_invoices)}/{len(to_send_invoices)}")
 else:
     print("[bold red]Nessuna fattura da inviare[/bold red]")
 input("\nPremere invio per continuare...")
