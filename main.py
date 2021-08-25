@@ -111,8 +111,8 @@ def send_invoices(path):
     return sent
 
 
-sent_invoices_path = "c:\\Users\\SER\\Desktop\\MARCO\\FATTURA PER CLIENTE"
-to_send_invoices_path = "c:\\Users\\SER\\Desktop\\MARCO\\Fattura_Xml"
+sent_invoices_path = "c:\\Users\\SER\\Desktop\\FATTURA PER CLIENTE"
+to_send_invoices_path = "d:\\ItoTech\\Documento\\Fattura_Xml"
 
 sent_invoices = Invoice(sent_invoices_path)
 ito_invoices = Invoice(to_send_invoices_path)
