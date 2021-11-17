@@ -74,6 +74,7 @@ class TSDigital:
         status_code = response.status_code
         if status_code == 200:
             token = response.json()["token"]
+            logging.info(f"Logged in as {self.email} with digest={self.digest}")
             logging.info(f"bearer token={token}")
             return f"Bearer {token}"
         else:
